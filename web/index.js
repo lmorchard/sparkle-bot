@@ -3,6 +3,13 @@ console.log("HELLO!");
 let socket, serverInstanceVersion;
 let reconnectTimer;
 
+function init () {
+  window.onload = () => {
+    fireworksLoop();
+  }
+  connectSocket();
+}
+
 const socketSend = (event, data = {}) => {
   if (!socket) return;
   socket.send(JSON.stringify({ ...data, event }));
@@ -37,11 +44,16 @@ function connectSocket() {
   });
 }
 
-connectSocket();
-
 const socketEventHandlers = {
   default: ({ data }) => {
     console.log("unexpected socket message", data);
+  },
+
+  boom: () => {
+    const numLaunch = parseInt(Math.random() * 10);
+    for (let idx = 0; idx < numLaunch; idx++) {
+      fireworksLaunch();
+    }
   },
 
   saidHello: ({ data: { message, userstate } }) => {
@@ -65,3 +77,5 @@ const socketEventHandlers = {
     }
   }
 };
+
+init();

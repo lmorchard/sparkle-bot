@@ -121,6 +121,18 @@ function setupChatBot () {
   client.connect();
 
   const chatCommands = {
+    boom: ({ client, channel, userstate, message }) => {
+      client.say(channel, `Okay, you asked for it!`);
+
+      wss.clients.forEach(wsClient => {
+        if (wsClient.readyState !== WebSocket.OPEN) return;
+        wsClient.send(
+          JSON.stringify({
+            event: "boom"
+          })
+        );
+      });
+    },
     hello: ({ client, channel, userstate, message }) => {
       client.say(channel, `Hello, ${userstate["display-name"]}.`);
 
