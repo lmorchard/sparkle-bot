@@ -9,6 +9,12 @@
     "start": "nodemon index.js"
   },
   "nodemonConfig": {
+    "verbose": true,
+    "ext": "js,css,html",
+    "watch": [
+      "index.js",
+      "web/*"
+    ],
     "ignore": [
       "test/*",
       "docs/*"

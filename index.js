@@ -10,10 +10,15 @@ const WebSocket = require("ws");
 // TODO: Grab these constants from a config file
 const host = "localhost";
 const port = 3000;
-const baseUrl = `http://${host}:${port}/`;
+const baseUrl = `http://${host}:${port}`;
 const webPath = path.join(__dirname, "web");
 
+const serverInstanceVersion = `${Date.now()}-${Math.random()}`;
+
+let wss;
+
 function init () {
+  console.log("serverInstanceVersion", serverInstanceVersion);
   const server = setupWebServer();
   setupWebSockets(server);
   setupChatBot();
@@ -31,13 +36,16 @@ function setupWebServer () {
 }
 
 function setupWebSockets (server) {
-  const wss = new WebSocket.Server({
+  console.log("Setting up websocket listener");
+
+  wss = new WebSocket.Server({
     noServer: true,
     verifyClient: ({ origin, req, secure }, cb) => {
       if (origin !== baseUrl) {
         return cb(false, 403, "Disallowed origin", {});
       }
       // TODO: Auth goes here if needed
+      return cb(true);
     }
   });
 
@@ -53,6 +61,10 @@ function setupWebSockets (server) {
   wss.on("connection", (ws, req) => {
     ws.id = uuidV4();
     console.log(`WebSocket connection ${ws.id}`);
+    ws.send(JSON.stringify({
+      event: "serverInstanceVersion",
+      serverInstanceVersion
+    }));
     ws.on("message", message => {
       try {
         const data = JSON.parse(message);
@@ -69,6 +81,20 @@ function setupWebSockets (server) {
       log.debug("Unimplemented message", data, ws.id, (ws.user || {}).name);
     }
   };
+
+  setInterval(() => {
+    wss.clients.forEach(client => {
+      if (client.readyState !== WebSocket.OPEN) {
+        return;
+      }
+      client.send(
+        JSON.stringify({
+          event: "systemTime",
+          systemTime: Date.now()
+        })
+      );
+    });
+  }, 1000);
 }
 
 function setupChatBot () {
@@ -79,8 +105,6 @@ function setupChatBot () {
     identity: require("./config/chat-identity.json")
   });
 
-  // Add chat event listener that will respond to "!command" messages with:
-  // "Hello world!".
   client.on("chat", (channel, userstate, message, self) => {
     console
       .log(`Message "${message}" received from ${userstate["display-name"]}`);
@@ -89,7 +113,7 @@ function setupChatBot () {
     if (self) return;
 
     if (message in chatCommands) {
-      chatCommands[message]({ client, channel });
+      chatCommands[message]({ client, channel, userstate, message });
     }
   });
 
@@ -97,8 +121,19 @@ function setupChatBot () {
   client.connect();
 
   const chatCommands = {
-    hello: ({ client, channel }) => {
-      client.say(channel, "Hello, you.");
+    hello: ({ client, channel, userstate, message }) => {
+      client.say(channel, `Hello, ${userstate["display-name"]}.`);
+
+      wss.clients.forEach(wsClient => {
+        if (wsClient.readyState !== WebSocket.OPEN) return;
+        wsClient.send(
+          JSON.stringify({
+            event: "saidHello",
+            message,
+            userstate
+          })
+        );
+      });
     }
   };
 }
