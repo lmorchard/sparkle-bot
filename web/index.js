@@ -3,10 +3,10 @@ console.log("HELLO!");
 let socket, serverInstanceVersion;
 let reconnectTimer;
 
-function init () {
+function init() {
   window.onload = () => {
-    fireworksLoop();
-  }
+    fireworks.loop();
+  };
   connectSocket();
 }
 
@@ -37,7 +37,7 @@ function connectSocket() {
     try {
       const data = JSON.parse(event.data);
       const name = data.event in socketEventHandlers ? data.event : "default";
-      socketEventHandlers[name]({ event, data });
+      socketEventHandlers[name](data, event);
     } catch (err) {
       console.log("socket message error", err, event);
     }
@@ -45,29 +45,34 @@ function connectSocket() {
 }
 
 const socketEventHandlers = {
-  default: ({ data }) => {
+  default: (data) => {
     console.log("unexpected socket message", data);
   },
 
-  boom: () => {
-    const numLaunch = parseInt(Math.random() * 10);
-    for (let idx = 0; idx < numLaunch; idx++) {
-      fireworksLaunch();
+  boom: (data) => {
+    const number = Math.max(1, Math.min(100, parseInt(data.number)));
+    const spread = Math.max(15, Math.min(360, parseInt(data.spread)));
+
+    for (let idx = 0; idx < number; idx++) {
+      const delay = parseInt(spread * Math.random());
+      fireworks.randomLaunch(delay);
     }
   },
 
-  saidHello: ({ data: { message, userstate } }) => {
+  saidHello: ({ message, userstate }) => {
     console.log("saidHello", message, userstate);
     const messageEl = document.querySelector("#message");
-    messageEl.innerText = `Last Hello: ${userstate["display-name"]} at ${(new Date()).toISOString()}`;
+    messageEl.innerText = `Last Hello: ${
+      userstate["display-name"]
+    } at ${new Date().toISOString()}`;
   },
 
-  systemTime: ({ data: { systemTime } }) => {
+  systemTime: ({ systemTime }) => {
     const messageEl = document.querySelector("#systemTime");
-    messageEl.innerText = `System Time: ${(new Date(systemTime)).toISOString()}`;
+    messageEl.innerText = `System Time: ${new Date(systemTime).toISOString()}`;
   },
 
-  serverInstanceVersion: ({ data }) => {
+  serverInstanceVersion: (data) => {
     if (!serverInstanceVersion) {
       serverInstanceVersion = data.serverInstanceVersion;
       console.log("serverInstanceVersion", serverInstanceVersion);

@@ -17,14 +17,14 @@ const serverInstanceVersion = `${Date.now()}-${Math.random()}`;
 
 let wss;
 
-function init () {
+function init() {
   console.log("serverInstanceVersion", serverInstanceVersion);
   const server = setupWebServer();
   setupWebSockets(server);
   setupChatBot();
 }
 
-function setupWebServer () {
+function setupWebServer() {
   const app = new Koa();
   app.use(KoaStatic(webPath));
 
@@ -35,7 +35,7 @@ function setupWebServer () {
   return server;
 }
 
-function setupWebSockets (server) {
+function setupWebSockets(server) {
   console.log("Setting up websocket listener");
 
   wss = new WebSocket.Server({
@@ -61,10 +61,12 @@ function setupWebSockets (server) {
   wss.on("connection", (ws, req) => {
     ws.id = uuidV4();
     console.log(`WebSocket connection ${ws.id}`);
-    ws.send(JSON.stringify({
-      event: "serverInstanceVersion",
-      serverInstanceVersion
-    }));
+    ws.send(
+      JSON.stringify({
+        event: "serverInstanceVersion",
+        serverInstanceVersion
+      })
+    );
     ws.on("message", message => {
       try {
         const data = JSON.parse(message);
@@ -97,7 +99,7 @@ function setupWebSockets (server) {
   }, 1000);
 }
 
-function setupChatBot () {
+function setupChatBot() {
   console.log("Starting chat bot");
 
   const client = TwitchJS.client({
@@ -106,45 +108,47 @@ function setupChatBot () {
   });
 
   client.on("chat", (channel, userstate, message, self) => {
-    console
-      .log(`Message "${message}" received from ${userstate["display-name"]}`);
-
     // Do not repond if the message is from the connected identity.
     if (self) return;
 
-    if (message in chatCommands) {
-      chatCommands[message]({ client, channel, userstate, message });
+    const [command, ...args] = message.split(" ");
+    if (command.substr(0, 1) === "!") {
+      const commandWord = command.substr(1);
+      if (commandWord in chatCommands) {
+        chatCommands[commandWord]({
+          args,
+          client,
+          channel,
+          userstate,
+          commandWord
+        });
+      }
     }
   });
 
   // Finally, connect to the channel
   client.connect();
 
-  const chatCommands = {
-    boom: ({ client, channel, userstate, message }) => {
-      client.say(channel, `Okay, you asked for it!`);
+  const broadcastToWebClients = message => {
+    wss.clients.forEach(wsClient => {
+      if (wsClient.readyState !== WebSocket.OPEN) return;
+      wsClient.send(JSON.stringify(message));
+    });
+  };
 
-      wss.clients.forEach(wsClient => {
-        if (wsClient.readyState !== WebSocket.OPEN) return;
-        wsClient.send(
-          JSON.stringify({
-            event: "boom"
-          })
-        );
-      });
+  const chatCommands = {
+    boom: ({ args, client, channel, userstate, message }) => {
+      const [ number = 1, spread = 30 ] = args;
+      client.say(channel, `Okay, you asked for it!`);
+      broadcastToWebClients({ event: "boom", number, spread });
     },
+
     hello: ({ client, channel, userstate, message }) => {
       client.say(channel, `Hello, ${userstate["display-name"]}.`);
-
-      wss.clients.forEach(wsClient => {
-        if (wsClient.readyState !== WebSocket.OPEN) return;
-        wsClient.send(
-          JSON.stringify({
-            event: "saidHello",
-            message,
-            userstate
-          })
-        );
+      broadcastToWebClients({
+        event: "saidHello",
+        message,
+        userstate
       });
     }
   };
