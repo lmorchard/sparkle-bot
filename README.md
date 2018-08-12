@@ -26,6 +26,4 @@ overlay.
 
 - [ ] Make the fireworks more dramatic
 
-- [ ] Share this as a project on Glitch?
-
 - [ ] Add eslint checking
