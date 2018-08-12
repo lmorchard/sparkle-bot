@@ -27,3 +27,5 @@ overlay.
 - [ ] Make the fireworks more dramatic
 
 - [ ] Add eslint checking
+
+- [ ] Secondary page with test controls - send websocket commands as an alternative to real Twitch events
