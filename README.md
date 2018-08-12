@@ -4,20 +4,19 @@ sparkle-bot
 A Twitch chat bot teamed up with a web page to make for a festive stream
 overlay.
 
-## Hacking
+[![Let there be fireworks](https://img.youtube.com/vi/SNBcUJ87j7Q/0.jpg)](https://www.youtube.com/watch?v=SNBcUJ87j7Q)
 
-1. Come up with some chat credentials for Twitch - including your Twitch
-   username, your bot's username, and [an OAuth token password](http://twitchapps.com/tmi/)
+## Hacking on Glitch
 
-1. Put that information in `config/chat-identity.json`
+1. Remix my project - <https://glitch.com/edit/#!/lmorchard-sparkle-bot>
 
-1. `npm install`
+1. Get chat credentials for Twitch - including your Twitch username, your bot's username, and [an OAuth token password](http://twitchapps.com/tmi/) for your bot.
 
-1. `npm start`
+1. Copy `.env.sample` to `.env` and fill out the variables with your chat credentials.
 
-1. Add this URL as a browser source overlay in your streaming software at 1920x1080: http://localhost:3000/
+1. Use your project URL as a browser source overlay in your streaming software at 1920x1080.
 
-1. Type `!boom 100 100` in your chat!
+1. Type `!boom 100 100` in your chat - if your bot is there, it should answer and you should see fireworks!
 
 ## TODO
 

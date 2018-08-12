@@ -8,14 +8,6 @@ html, body {
 div.app {
   width: 1920px;
   height: 1080px;
-  /*
-  background-color: rgba(255, 255, 255, 0.5);
-  */
-}
-
-p {
-  color: #ddd;
-  text-shadow: 0px 0px 1px #000;
 }
 
 h1 {
@@ -25,11 +17,20 @@ h1 {
   text-shadow: 0px 0px 1px #000;
 }
 
-#message { display: none; }
-#systemTime { display: none; }
+p {
+  color: #ddd;
+  text-shadow: 0px 0px 1px #000;
+}
+
+p#message { display: none }
+
+p#systemTime { display: none }
 
 canvas#canvas {
 	margin: 0;
+  position: absolute;
+  left: 0;
+  top: 0;
   width: 1920px;
   height: 1080px;
 	display: block;
