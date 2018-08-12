@@ -1,5 +1,0 @@
-{
-  "channels": ["#yourname"],
-  "username": "botsname",
-  "password": "oauth:PASSWORD"
-}

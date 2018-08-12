@@ -1,0 +1,13 @@
+{
+  "verbose": true,
+  "ext": "js,css,html",
+  "watch": [
+    "index.js",
+    "web/*"
+  ],
+  "ignore": [
+    "test/*",
+    "docs/*"
+  ],
+  "delay": "2500"
+}

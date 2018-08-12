@@ -1,4 +1,4 @@
-console.log("HELLO!");
+/* global fireworks */
 
 let socket, serverInstanceVersion;
 let reconnectTimer;
@@ -17,11 +17,12 @@ const socketSend = (event, data = {}) => {
 
 function connectSocket() {
   const { protocol, host } = window.location;
-  const wsUrl = `${protocol === "https" ? "wss" : "ws"}://${host}/socket`;
+  const wsUrl = `${protocol === "https:" ? "wss" : "ws"}://${host}/socket`;
+  console.log("wsUrl", protocol, wsUrl);
 
   console.log(`Connecting websocket to ${wsUrl}`);
   socket = new WebSocket(wsUrl);
-
+  
   socket.addEventListener("open", event => {
     console.log("Websocket connected!");
     if (reconnectTimer) clearInterval(reconnectTimer);
@@ -53,6 +54,8 @@ const socketEventHandlers = {
     const number = Math.max(1, Math.min(100, parseInt(data.number)));
     const spread = Math.max(15, Math.min(360, parseInt(data.spread)));
 
+    console.log("boom", number, spread);
+    
     for (let idx = 0; idx < number; idx++) {
       const delay = parseInt(spread * Math.random());
       fireworks.randomLaunch(delay);
