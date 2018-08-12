@@ -102,7 +102,7 @@ function setupWebSockets(server) {
 function setupChatBot() {
   console.log("Starting chat bot");
 
-  const { channel, ...identity } = require("./config/chat-identity.json");
+  const { channels, ...identity } = require("./config/chat-identity.json");
   const client = TwitchJS.client({ channels, identity });
 
   client.on("chat", (channel, userstate, message, self) => {
