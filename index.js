@@ -102,10 +102,8 @@ function setupWebSockets(server) {
 function setupChatBot() {
   console.log("Starting chat bot");
 
-  const client = TwitchJS.client({
-    channels: ["#lmorchard"],
-    identity: require("./config/chat-identity.json")
-  });
+  const { channel, ...identity } = require("./config/chat-identity.json");
+  const client = TwitchJS.client({ channels, identity });
 
   client.on("chat", (channel, userstate, message, self) => {
     // Do not repond if the message is from the connected identity.
